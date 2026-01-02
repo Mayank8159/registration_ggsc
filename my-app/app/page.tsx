@@ -1,65 +1,144 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState } from "react";
+import axios from "axios";
+import { Playfair_Display } from "next/font/google";
+
+// 🎨 Playfair Display Font
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+});
+
+// 🔗 BACKEND URL
+const BACKEND_URL = "https://your-backend-domain.com";
+
+export default function Page() {
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    enrollment: "",
+    phone: "",
+    department: "",
+    year: "",
+  });
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await axios.post(`${BACKEND_URL}/api/register`, form);
+      alert("Form submitted successfully");
+    } catch (error) {
+      alert("Submission failed");
+      console.error(error);
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
+    <div
+      className="min-h-screen flex items-center justify-center relative overflow-hidden
+                 md:py-16 lg:py-24"
+    >
+      {/* 🌄 Backgrounds */}
+      <img
+        src="/desktop_view.png"
+        alt=""
+        className="hidden md:block absolute inset-0 w-full h-full object-cover -z-10"
+      />
+      <img
+        src="/mobileview.png"
+        alt=""
+        className="md:hidden absolute inset-0 w-full h-full object-cover -z-10"
+      />
+
+      {/* 🧊 Form */}
+      <form
+        onSubmit={handleSubmit}
+        className="w-[90%] max-w-md backdrop-blur-lg
+                   bg-white/10 border border-white/20
+                   rounded-2xl p-8 shadow-2xl"
+      >
+        {/* 🔰 Logos */}
+        <div className="flex flex-col items-center gap-2 mb-2">
           <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            href="https://ggscuemk.tech"
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+            <img
+              src="/icon1.png"
+              alt="GGS CUE MK"
+              className="w-[20.5rem] md:w-80 h-auto object-contain
+                         drop-shadow-[0_10px_25px_rgba(0,0,0,0.5)]
+                         hover:scale-105 transition-transform duration-300 cursor-pointer"
             />
-            Deploy Now
           </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+          <img
+            src="/mainicon2.png"
+            alt="Main Logo"
+            className="w-[22rem] md:w-[24rem] h-auto object-contain
+                       drop-shadow-[0_10px_25px_rgba(0,0,0,0.5)]"
+          />
         </div>
-      </main>
+
+        {/* 📝 Heading */}
+        <h1
+          className={`${playfair.className} text-3xl font-semibold text-center mb-6 text-amber-950`}
+        >
+          Registration
+        </h1>
+
+        {/* 📋 Inputs */}
+        <div className="space-y-4">
+          <input className="glass-input" name="name" placeholder="Full Name" onChange={handleChange} required />
+          <input className="glass-input" name="email" type="email" placeholder="Email ID" onChange={handleChange} required />
+          <input className="glass-input" name="enrollment" placeholder="Enrollment Number" onChange={handleChange} required />
+          <input className="glass-input" name="phone" placeholder="Phone Number" onChange={handleChange} required />
+          <input className="glass-input" name="department" placeholder="Department" onChange={handleChange} required />
+
+          <select name="year" onChange={handleChange} required className="glass-input">
+            <option value="">Select College Year</option>
+            <option>1st Year</option>
+            <option>2nd Year</option>
+            <option>3rd Year</option>
+            <option>4th Year</option>
+          </select>
+        </div>
+
+        {/* 🚀 Submit */}
+        <button
+          type="submit"
+          className={`${playfair.className} mt-6 w-full py-3 rounded-xl
+                     bg-amber-950 text-white text-xl
+                     hover:bg-black transition`}
+        >
+          Submit
+        </button>
+      </form>
+
+      {/* 🎨 Glass styles */}
+      <style>{`
+        .glass-input {
+          width: 100%;
+          padding: 12px;
+          border-radius: 12px;
+          background: rgba(54, 69, 79, 0.3);
+          border: 1px solid rgba(255, 255, 255, 0.35);
+          outline: none;
+          color: #000;
+        }
+
+        .glass-input::placeholder {
+          color: rgba(0, 0, 0, 0.6);
+        }
+      `}</style>
     </div>
   );
 }
