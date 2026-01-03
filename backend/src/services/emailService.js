@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -9,41 +9,16 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Create email transporter
-// defaulting to secure (465) but allowing overrides via env vars
-const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.EMAIL_PORT || '465'),
-    secure: process.env.EMAIL_SECURE === 'true',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
-    },
-    tls: {
-        rejectUnauthorized: false
-    },
-    family: 4 // Force IPv4
-});
+// Initialize Resend
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-console.log('📧 Email Config:', {
-    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-    port: process.env.EMAIL_PORT || '465',
-    secure: process.env.EMAIL_SECURE === 'true',
-    user: process.env.EMAIL_USER ? '(set)' : '(missing)',
-    ipv4_forced: true
-});
-
-// Verify transporter configuration
-transporter.verify((error, success) => {
-    if (error) {
-        console.error('❌ Email transporter configuration error:', error.message);
-    } else {
-        console.log('✅ Email server is ready to send emails');
-    }
+console.log('📧 Email Service: Resend API initialized', {
+    apiKey: process.env.RESEND_API_KEY ? '(set)' : '(missing)',
+    from: `${process.env.EMAIL_FROM_NAME} <${process.env.EMAIL_FROM_ADDRESS}>`
 });
 
 /**
- * Send registration confirmation email
+ * Send registration confirmation email using Resend
  * @param {Object} user - User data object
  * @param {string} user.full_name - Full name of user
  * @param {string} user.email - Email address
@@ -91,17 +66,22 @@ export async function sendRegistrationEmail(user) {
             personalizedText = personalizedText.replace(regex, value);
         });
 
-        // Send email
-        const info = await transporter.sendMail({
-            from: `"${process.env.EMAIL_FROM_NAME || 'GGSC Event'}" <${process.env.EMAIL_FROM_ADDRESS}>`,
+        // Send email using Resend
+        const { data, error } = await resend.emails.send({
+            from: `${process.env.EMAIL_FROM_NAME || 'GGSC Event'} <${process.env.EMAIL_FROM_ADDRESS}>`,
             to: user.email,
             subject: '🎉 Registration Successful - Treasure Hunt: Chamber of Secrets',
             text: personalizedText,
             html: personalizedHtml,
         });
 
-        console.log('✅ Email sent successfully:', info.messageId);
-        return { success: true, messageId: info.messageId };
+        if (error) {
+            console.error('❌ Resend API error:', error);
+            throw error;
+        }
+
+        console.log('✅ Email sent successfully via Resend:', data.id);
+        return { success: true, messageId: data.id };
     } catch (error) {
         console.error('❌ Error sending email:', error);
         throw error;
@@ -114,16 +94,21 @@ export async function sendRegistrationEmail(user) {
  */
 export async function sendTestEmail(toEmail) {
     try {
-        const info = await transporter.sendMail({
-            from: `"${process.env.EMAIL_FROM_NAME || 'GGSC Event'}" <${process.env.EMAIL_FROM_ADDRESS}>`,
+        const { data, error } = await resend.emails.send({
+            from: `${process.env.EMAIL_FROM_NAME || 'GGSC Event'} <${process.env.EMAIL_FROM_ADDRESS}>`,
             to: toEmail,
             subject: 'Test Email - GGSC Backend',
             text: 'This is a test email from the GGSC backend. Email service is working correctly!',
             html: '<p>This is a test email from the GGSC backend.</p><p><strong>Email service is working correctly!</strong></p>',
         });
 
-        console.log('✅ Test email sent:', info.messageId);
-        return { success: true, messageId: info.messageId };
+        if (error) {
+            console.error('❌ Resend API error:', error);
+            throw error;
+        }
+
+        console.log('✅ Test email sent via Resend:', data.id);
+        return { success: true, messageId: data.id };
     } catch (error) {
         console.error('❌ Error sending test email:', error);
         throw error;
