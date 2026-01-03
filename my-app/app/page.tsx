@@ -11,8 +11,8 @@ const playfair = Playfair_Display({
 });
 
 // 🔗 BACKEND URL
-// const BACKEND_URL = "https://registration-ggsc.onrender.com";
-const BACKEND_URL = "http://localhost:3000";  // For local development  
+const BACKEND_URL = "https://registration-ggsc.onrender.com";
+// const BACKEND_URL = "http://localhost:3000";  // For local development  
 
 export default function Page() {
   const [form, setForm] = useState({
