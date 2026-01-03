@@ -11,17 +11,21 @@ const playfair = Playfair_Display({
 });
 
 // 🔗 BACKEND URL
-const BACKEND_URL = "https://your-backend-domain.com";
+const BACKEND_URL = "http://localhost:3000";
 
 export default function Page() {
   const [form, setForm] = useState({
-    name: "",
+    full_name: "",
     email: "",
-    enrollment: "",
-    phone: "",
+    password: "",
+    enrollment_number: "",
+    mobile_number: "",
     department: "",
     year: "",
   });
+
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState({ type: "", text: "" });
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -31,12 +35,48 @@ export default function Page() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    setMessage({ type: "", text: "" });
+
     try {
-      await axios.post(`${BACKEND_URL}/api/register`, form);
-      alert("Form submitted successfully");
-    } catch (error) {
-      alert("Submission failed");
-      console.error(error);
+      // Convert year string to number (1-4)
+      const yearMap: { [key: string]: number } = {
+        "1st Year": 1,
+        "2nd Year": 2,
+        "3rd Year": 3,
+        "4th Year": 4,
+      };
+
+      const payload = {
+        ...form,
+        year: yearMap[form.year],
+      };
+
+      const response = await axios.post(`${BACKEND_URL}/api/auth/signup`, payload);
+
+      setMessage({
+        type: "success",
+        text: "Registration successful! You can now login."
+      });
+
+      // Reset form
+      setForm({
+        full_name: "",
+        email: "",
+        password: "",
+        enrollment_number: "",
+        mobile_number: "",
+        department: "",
+        year: "",
+      });
+
+      console.log("Registration response:", response.data);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || "Registration failed. Please try again.";
+      setMessage({ type: "error", text: errorMessage });
+      console.error("Registration error:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -95,15 +135,79 @@ export default function Page() {
           Registration
         </h1>
 
+        {/* 💬 Message Display */}
+        {message.text && (
+          <div
+            className={`mb-4 p-3 rounded-lg text-center ${message.type === "success"
+                ? "bg-green-500/20 border border-green-500/50 text-green-900"
+                : "bg-red-500/20 border border-red-500/50 text-red-900"
+              }`}
+          >
+            {message.text}
+          </div>
+        )}
+
         {/* 📋 Inputs */}
         <div className="space-y-4">
-          <input className="glass-input" name="name" placeholder="Full Name" onChange={handleChange} required />
-          <input className="glass-input" name="email" type="email" placeholder="Email ID" onChange={handleChange} required />
-          <input className="glass-input" name="enrollment" placeholder="Enrollment Number" onChange={handleChange} required />
-          <input className="glass-input" name="phone" placeholder="Phone Number" onChange={handleChange} required />
-          <input className="glass-input" name="department" placeholder="Department" onChange={handleChange} required />
+          <input
+            className="glass-input"
+            name="full_name"
+            placeholder="Full Name"
+            value={form.full_name}
+            onChange={handleChange}
+            required
+          />
+          <input
+            className="glass-input"
+            name="email"
+            type="email"
+            placeholder="Email ID"
+            value={form.email}
+            onChange={handleChange}
+            required
+          />
+          <input
+            className="glass-input"
+            name="password"
+            type="password"
+            placeholder="Password (min 6 characters)"
+            value={form.password}
+            onChange={handleChange}
+            minLength={6}
+            required
+          />
+          <input
+            className="glass-input"
+            name="enrollment_number"
+            placeholder="Enrollment Number"
+            value={form.enrollment_number}
+            onChange={handleChange}
+            required
+          />
+          <input
+            className="glass-input"
+            name="mobile_number"
+            placeholder="Phone Number"
+            value={form.mobile_number}
+            onChange={handleChange}
+            required
+          />
+          <input
+            className="glass-input"
+            name="department"
+            placeholder="Department"
+            value={form.department}
+            onChange={handleChange}
+            required
+          />
 
-          <select name="year" onChange={handleChange} required className="glass-input">
+          <select
+            name="year"
+            value={form.year}
+            onChange={handleChange}
+            required
+            className="glass-input"
+          >
             <option value="">Select College Year</option>
             <option>1st Year</option>
             <option>2nd Year</option>
@@ -115,11 +219,13 @@ export default function Page() {
         {/* 🚀 Submit */}
         <button
           type="submit"
+          disabled={loading}
           className={`${playfair.className} mt-6 w-full py-3 rounded-xl
                      bg-amber-950 text-white text-xl
-                     hover:bg-black transition`}
+                     hover:bg-black transition
+                     disabled:opacity-50 disabled:cursor-not-allowed`}
         >
-          Submit
+          {loading ? "Submitting..." : "Submit"}
         </button>
       </form>
 

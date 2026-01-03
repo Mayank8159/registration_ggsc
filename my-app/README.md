@@ -1,36 +1,115 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Frontend - GGSC Registration
 
-## Getting Started
+Next.js frontend application for the GGSC event registration system.
 
-First, run the development server:
+## Features
+
+- ✅ User registration form with validation
+- ✅ Integration with backend API
+- ✅ Responsive glassmorphism design
+- ✅ Success/error message display
+- ✅ Loading states
+
+## Backend Integration
+
+The frontend connects to the backend API at `http://localhost:3000` by default.
+
+### API Endpoint Used
+
+- **POST** `/api/auth/signup` - User registration
+
+### Form Fields Mapping
+
+| Frontend Field | Backend Field | Type |
+|----------------|---------------|------|
+| Full Name | `full_name` | string |
+| Email ID | `email` | string |
+| Password | `password` | string |
+| Enrollment Number | `enrollment_number` | string |
+| Phone Number | `mobile_number` | string |
+| Department | `department` | string |
+| College Year | `year` | number (1-4) |
+
+## Setup
+
+### 1. Install Dependencies
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Configure Backend URL
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+If your backend is not running on `localhost:3000`, update the `BACKEND_URL` constant in `app/page.tsx`:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```typescript
+const BACKEND_URL = "http://your-backend-url:3000";
+```
 
-## Learn More
+For production, update it to your deployed backend URL.
 
-To learn more about Next.js, take a look at the following resources:
+### 3. Run Development Server
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+pnpm dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Deploy on Vercel
+## Production Deployment
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Update Backend URL
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Before deploying, update `BACKEND_URL` in `app/page.tsx` to your production backend URL:
+
+```typescript
+const BACKEND_URL = "https://your-backend-domain.com";
+```
+
+### Build
+
+```bash
+pnpm build
+```
+
+### Start Production Server
+
+```bash
+pnpm start
+```
+
+## Project Structure
+
+```
+my-app/
+├── app/
+│   ├── page.tsx          # Registration form
+│   ├── layout.tsx        # Root layout
+│   ├── globals.css       # Global styles
+│   └── favicon.ico
+├── public/
+│   ├── desktop_view.png  # Desktop background
+│   ├── mobileview.png    # Mobile background
+│   └── *.png             # Logos and icons
+└── package.json
+```
+
+## Development Notes
+
+- The form automatically converts year strings ("1st Year", etc.) to numbers (1-4) for the backend
+- Password minimum length is 6 characters
+- All fields are required
+- Success/error messages are displayed above the form
+- Form is cleared on successful registration
+
+## Technologies
+
+- **Next.js 16** - React framework
+- **TypeScript** - Type safety
+- **Tailwind CSS 4** - Styling
+- **Axios** - HTTP client
+- **Playfair Display** - Google Font
+
+## CORS Configuration
+
+Make sure your backend has CORS enabled for the frontend domain. The backend already has this configured.

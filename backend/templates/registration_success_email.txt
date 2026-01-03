@@ -1,0 +1,44 @@
+/**
+ * Plain text version of the registration success email
+ * For email clients that don't support HTML
+ */
+
+========================================
+🎉 REGISTRATION SUCCESSFUL!
+========================================
+
+Welcome, {{USER_NAME}}!
+
+We're thrilled to welcome you to our upcoming adventure.
+
+----------------------------------------
+🗺️ TREASURE HUNT: CHAMBER OF SECRETS
+----------------------------------------
+
+Get ready to embark on a thrilling quest filled with puzzles, hidden clues, and mysterious challenges waiting to be uncovered.
+
+Sharpen your wits, gather your courage, and prepare to unlock secrets that will test your teamwork and problem-solving skills.
+
+========================================
+YOUR REGISTRATION DETAILS
+========================================
+
+Name:               {{USER_NAME}}
+Email:              {{USER_EMAIL}}
+Enrollment Number:  {{ENROLLMENT_NUMBER}}
+Department:         {{DEPARTMENT}}
+Year:               {{YEAR}}
+
+========================================
+
+Stay tuned for further details!
+May the best hunters prevail! 🏆
+
+----------------------------------------
+
+If you have any questions, please contact us at:
+gambassador2025@gmail.com
+
+© 2026 GGSC Event. All rights reserved.
+
+This email was sent to {{USER_EMAIL}} because you registered for the Treasure Hunt event.
