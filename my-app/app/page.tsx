@@ -12,7 +12,7 @@ const playfair = Playfair_Display({
 
 // 🔗 BACKEND URL
 const BACKEND_URL = "https://registration-ggsc.onrender.com";
-// const BACKEND_URL = "http://localhost:3000";  // For local development
+// const BACKEND_URL = "http://localhost:3000";
 
 export default function Page() {
   const [form, setForm] = useState({
@@ -41,7 +41,6 @@ export default function Page() {
     setMessage({ type: "", text: "" });
 
     try {
-      // Convert year string to number (1-4)
       const yearMap: { [key: string]: number } = {
         "1st Year": 1,
         "2nd Year": 2,
@@ -55,47 +54,12 @@ export default function Page() {
       };
 
       await axios.post(`${BACKEND_URL}/api/auth/signup`, payload);
-
-      // Show success screen
       setIsSuccess(true);
-
-      // Reset form
-      setForm({
-        full_name: "",
-        email: "",
-        password: "",
-        enrollment_number: "",
-        mobile_number: "",
-        department: "",
-        year: "",
+    } catch {
+      setMessage({
+        type: "error",
+        text: "Registration failed. Please try again.",
       });
-    } catch (error: any) {
-      let errorMessage = "Registration failed. Please try again.";
-
-      // Handle backend errors
-      if (error.response?.data?.error) {
-        const backendError = error.response.data.error;
-        const errorString =
-          typeof backendError === "string"
-            ? backendError
-            : JSON.stringify(backendError);
-
-        if (
-          errorString.includes("users_pkey") ||
-          errorString.includes("already registered")
-        ) {
-          errorMessage = "User already registered! Please login instead.";
-        } else if (errorString.includes("email")) {
-          errorMessage = "Email already in use!";
-        } else if (errorString.includes("enrollment_number")) {
-          errorMessage = "Enrollment number already registered!";
-        } else {
-          errorMessage = errorString;
-        }
-      }
-
-      setMessage({ type: "error", text: errorMessage });
-      console.error("Registration error:", error);
     } finally {
       setLoading(false);
     }
@@ -103,8 +67,11 @@ export default function Page() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center relative overflow-hidden
-                 md:py-16 lg:py-24"
+      className="
+        min-h-screen relative overflow-hidden
+        flex items-start md:items-center justify-center
+        py-10 md:py-16 lg:py-24
+      "
     >
       {/* 🌄 Backgrounds */}
       <img
@@ -120,44 +87,20 @@ export default function Page() {
 
       {isSuccess ? (
         /* ✅ Success Screen */
-        <div
-          className="w-[90%] max-w-md backdrop-blur-lg
-                       bg-white/10 border border-white/20
-                       rounded-2xl p-8 shadow-2xl text-center animate-fade-in"
-        >
-          <div className="flex flex-col items-center gap-4 mb-6">
-            <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center border border-green-500/50 mb-2">
-              <span className="text-4xl">🎉</span>
-            </div>
+        <div className="w-[90%] max-w-md backdrop-blur-lg bg-white/10 border border-white/20 rounded-2xl p-8 shadow-2xl text-center">
+          <h1
+            className={`${playfair.className} text-3xl font-bold text-amber-950 mb-4`}
+          >
+            Registration Successful 🎉
+          </h1>
 
-            <h1
-              className={`${playfair.className} text-3xl font-bold text-amber-950`}
-            >
-              Registration Successful!
-            </h1>
-
-            <p className="text-gray-800 font-medium text-lg">
-              Welcome to the Chamber of Secrets 🗝️
-            </p>
-          </div>
-
-          <div className="bg-white/30 rounded-xl p-6 border border-white/40 mb-6">
-            <h3 className="font-semibold text-amber-900 mb-2">
-              📧 Please Check Your Email needed
-            </h3>
-            <p className="text-sm text-gray-700 leading-relaxed">
-              We've sent a confirmation scroll to <strong>{form.email}</strong>.
-              <br />
-              Check your inbox (and spam folder) for further instructions on the
-              Treasure Hunt.
-            </p>
-          </div>
+          <p className="text-gray-800 mb-6">
+            Please check your email for further instructions.
+          </p>
 
           <button
             onClick={() => window.location.reload()}
-            className={`${playfair.className} w-full py-3 rounded-xl
-                       bg-amber-950 text-white text-lg
-                       hover:bg-black transition shadow-lg`}
+            className={`${playfair.className} w-full py-3 rounded-xl bg-amber-950 text-white text-lg hover:bg-black transition`}
           >
             Back to Home
           </button>
@@ -166,9 +109,7 @@ export default function Page() {
         /* 🧊 Form */
         <form
           onSubmit={handleSubmit}
-          className="w-[90%] max-w-md backdrop-blur-lg
-                     bg-white/10 border border-white/20
-                     rounded-2xl p-8 shadow-2xl"
+          className="w-[90%] max-w-md backdrop-blur-lg bg-white/10 border border-white/20 rounded-2xl p-8 shadow-2xl"
         >
           {/* 🔰 Logos */}
           <div className="flex flex-col items-center gap-2 mb-2">
@@ -180,17 +121,14 @@ export default function Page() {
               <img
                 src="/icon1.png"
                 alt="GGS CUE MK"
-                className="w-[20.5rem] md:w-80 h-auto object-contain
-                           drop-shadow-[0_10px_25px_rgba(0,0,0,0.5)]
-                           hover:scale-105 transition-transform duration-300 cursor-pointer"
+                className="w-[20.5rem] md:w-80 hover:scale-105 transition"
               />
             </a>
 
             <img
               src="/mainicon2.png"
               alt="Main Logo"
-              className="w-[22rem] md:w-[24rem] h-auto object-contain
-                         drop-shadow-[0_10px_25px_rgba(0,0,0,0.5)]"
+              className="w-[22rem] md:w-[24rem]"
             />
           </div>
 
@@ -201,15 +139,9 @@ export default function Page() {
             Registration
           </h1>
 
-          {/* 💬 Message Display */}
+          {/* 💬 Message */}
           {message.text && (
-            <div
-              className={`mb-4 p-3 rounded-lg text-center ${
-                message.type === "success"
-                  ? "bg-green-500/20 border border-green-500/50 text-green-900"
-                  : "bg-red-500/20 border border-red-500/50 text-red-900"
-              }`}
-            >
+            <div className="mb-4 p-3 rounded-lg text-center bg-red-500/20 border border-red-500/50 text-red-900">
               {message.text}
             </div>
           )}
@@ -220,65 +152,53 @@ export default function Page() {
               className="glass-input"
               name="full_name"
               placeholder="Full Name"
-              value={form.full_name}
-              onChange={handleChange}
               required
+              onChange={handleChange}
             />
             <input
               className="glass-input"
               name="email"
               type="email"
               placeholder="Email ID"
-              value={form.email}
-              onChange={handleChange}
               required
+              onChange={handleChange}
             />
             <input
               className="glass-input"
               name="password"
               type="password"
-              placeholder="Password (min 6 characters)"
-              value={form.password}
-              onChange={handleChange}
+              placeholder="Password"
               minLength={6}
               required
+              onChange={handleChange}
             />
             <input
               className="glass-input"
               name="enrollment_number"
               placeholder="Enrollment Number"
-              value={form.enrollment_number}
               minLength={14}
               maxLength={14}
-              onChange={handleChange}
               required
+              onChange={handleChange}
             />
             <input
               className="glass-input"
               name="mobile_number"
-              type="tel"
-              pattern="[0-9]{10}"
-              minLength={10}
-              maxLength={10}             
-              inputMode="numeric"
               placeholder="Phone Number"
             />
-
             <input
               className="glass-input"
               name="department"
               placeholder="Department"
-              value={form.department}
-              onChange={handleChange}
               required
+              onChange={handleChange}
             />
 
             <select
               name="year"
-              value={form.year}
-              onChange={handleChange}
-              required
               className="glass-input"
+              required
+              onChange={handleChange}
             >
               <option value="">Select College Year</option>
               <option>1st Year</option>
@@ -288,14 +208,51 @@ export default function Page() {
             </select>
           </div>
 
+          {/* 📞 Contact Us */}
+          <details className="mt-5 rounded-xl border border-amber-950 bg-white/20 backdrop-blur-md">
+            <summary
+              className={`${playfair.className} cursor-pointer select-none px-4 py-3 text-lg font-semibold text-amber-950`}
+            >
+              Contact Us
+            </summary>
+
+            <div className="px-4 pb-4 pt-2 text-gray-800 text-sm space-y-2">
+              <p>
+                <strong>🎮 Theme:</strong> Temple Run
+              </p>
+              <p>
+                <strong>🧩 Activities:</strong> Treasure hunt, games, quizzes, VR
+              </p>
+              <p>
+                <strong>🏆 Prizes:</strong> Cash prizes for winners
+              </p>
+              <p>
+                <strong>📅 Date:</strong> 7th February 2026
+              </p>
+
+              <hr className="border-white/40 my-2" />
+
+              <p className="font-semibold">For any queries, contact:</p>
+              <p>
+                👤 Ashna Islam:{" "}
+                <a href="tel:9874140007" className="underline">
+                  9874140007
+                </a>
+              </p>
+              <p>
+                👤 Arnab Sarkar:{" "}
+                <a href="tel:8016681646" className="underline">
+                  8016681646
+                </a>
+              </p>
+            </div>
+          </details>
+
           {/* 🚀 Submit */}
           <button
             type="submit"
             disabled={loading}
-            className={`${playfair.className} mt-6 w-full py-3 rounded-xl
-                       bg-amber-950 text-white text-xl
-                       hover:bg-black transition
-                       disabled:opacity-50 disabled:cursor-not-allowed`}
+            className={`${playfair.className} mt-6 w-full py-3 rounded-xl bg-amber-950 text-white text-xl hover:bg-black transition disabled:opacity-50`}
           >
             {loading ? "Submitting..." : "Submit"}
           </button>
@@ -303,7 +260,6 @@ export default function Page() {
       )}
 
       {/* 🎨 Glass styles */}
-
       <style>{`
         .glass-input {
           width: 100%;
@@ -313,10 +269,6 @@ export default function Page() {
           border: 1px solid rgba(255, 255, 255, 0.35);
           outline: none;
           color: #000;
-        }
-
-        .glass-input::placeholder {
-          color: rgba(0, 0, 0, 0.6);
         }
       `}</style>
     </div>
