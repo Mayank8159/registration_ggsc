@@ -67,9 +67,6 @@ export default function Page() {
         {/* 📅 Event Info */}
         <div className="text-sm text-gray-800 space-y-2 mb-6">
           <p>
-            <strong>🎮 Theme:</strong> Temple Run
-          </p>
-          <p>
             <strong>🧩 Activities:</strong> Treasure hunt, games, quizzes, VR Games
           </p>
           <p>
