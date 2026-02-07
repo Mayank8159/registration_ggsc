@@ -18,10 +18,48 @@ router.get('/', async (req, res) => {
             return res.status(400).json({ error: error.message });
         }
 
-        res.status(200).json({ 
-            teams: data, 
+        res.status(200).json({
+            teams: data,
             count: data.length,
             total_members: data.reduce((sum, team) => sum + team.member_count, 0)
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Assign a user to a team using FIFO logic
+ * POST /api/teams/assign-fifo
+ * Called automatically when a user is marked present
+ */
+router.post('/assign-fifo', async (req, res) => {
+    try {
+        const { user_id, email, team_size = 4, team_name_prefix = 'Team' } = req.body;
+
+        if (!user_id || !email) {
+            return res.status(400).json({ error: 'user_id and email are required' });
+        }
+
+        // Call the database function for FIFO team assignment
+        const { data, error } = await supabaseAdmin.rpc('assign_user_to_team_fifo', {
+            p_user_id: user_id,
+            p_user_email: email.toLowerCase().trim(),
+            p_team_size: parseInt(team_size),
+            p_team_name_prefix: team_name_prefix
+        });
+
+        if (error) {
+            return res.status(400).json({ error: error.message });
+        }
+
+        const assignment = data && data.length > 0 ? data[0] : null;
+
+        res.status(200).json({
+            message: assignment?.is_new_team
+                ? `User assigned to new ${assignment.team_name}`
+                : `User assigned to existing ${assignment?.team_name}`,
+            team_assignment: assignment
         });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -88,7 +126,7 @@ router.post('/create-random', async (req, res) => {
 router.get('/user/:identifier', async (req, res) => {
     try {
         const { identifier } = req.params;
-        
+
         // URL decode the identifier in case it contains encoded characters
         const decodedIdentifier = decodeURIComponent(identifier);
 
@@ -161,7 +199,7 @@ router.get('/user/:identifier', async (req, res) => {
             }))
         };
 
-        res.status(200).json({ 
+        res.status(200).json({
             user: {
                 user_id: data.user_id,
                 email: data.email,

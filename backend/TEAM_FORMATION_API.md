@@ -1,16 +1,24 @@
 # Team Formation API Documentation
 
 ## Overview
-The team formation system randomly assigns registered users into teams of 4 members. This works alongside the QRMaze individual scoring system.
+
+The team formation system supports two modes:
+
+1. **FIFO Assignment (Default)**: Users are automatically assigned to teams of 4 as soon as they're marked present. Teams fill in order (First In, First Out).
+2. **Random Assignment**: Admin can manually trigger random team formation for all present users.
+
+This works alongside the QRMaze individual scoring system.
 
 ## Database Changes
 
 ### Migration: 005_create_team_members.sql
+
 - **Creates**: `team_members` table for random team assignments
 - **View**: `team_summary` - Aggregated team information with member details
 - **Function**: `create_random_team_assignments()` - Randomly form teams
 
 ### Team Members Table Structure
+
 ```sql
 {
   id: UUID,
@@ -31,11 +39,13 @@ The team formation system randomly assigns registered users into teams of 4 memb
 ## API Endpoints
 
 ### 1. Verify Email
+
 **Endpoint**: `POST /api/verify-email`
 
 **Purpose**: Check if an email exists in the registered users table
 
 **Request Body**:
+
 ```json
 {
   "email": "user@example.com"
@@ -43,6 +53,7 @@ The team formation system randomly assigns registered users into teams of 4 memb
 ```
 
 **Success Response - Email Found** (200):
+
 ```json
 {
   "success": true,
@@ -61,6 +72,7 @@ The team formation system randomly assigns registered users into teams of 4 memb
 ```
 
 **Success Response - Email Not Found** (200):
+
 ```json
 {
   "success": true,
@@ -71,6 +83,7 @@ The team formation system randomly assigns registered users into teams of 4 memb
 ```
 
 **Error Response** (400):
+
 ```json
 {
   "success": false,
@@ -82,11 +95,13 @@ The team formation system randomly assigns registered users into teams of 4 memb
 ---
 
 ### 2. Verify Multiple Emails (Bulk)
+
 **Endpoint**: `POST /api/verify-email/bulk`
 
 **Purpose**: Verify multiple emails in a single request (max 100)
 
 **Request Body**:
+
 ```json
 {
   "emails": [
@@ -98,6 +113,7 @@ The team formation system randomly assigns registered users into teams of 4 memb
 ```
 
 **Response** (200):
+
 ```json
 {
   "success": true,
@@ -136,12 +152,49 @@ The team formation system randomly assigns registered users into teams of 4 memb
 
 ---
 
-### 3. Create Random Teams
+### 3. Assign User to Team (FIFO - Automatic)
+
+**Endpoint**: `POST /api/teams/assign-fifo`
+
+**Purpose**: Assign a single user to the first available team (< 4 members) or create a new team. This is called automatically when marking attendance.
+
+**Request Body**:
+
+```json
+{
+  "user_id": "uuid",
+  "email": "user@example.com",
+  "team_size": 4,
+  "team_name_prefix": "Team"
+}
+```
+
+**Response** (200):
+
+```json
+{
+  "message": "User assigned to Team 3",
+  "team_assignment": {
+    "team_number": 3,
+    "team_name": "Team 3",
+    "member_count": 2,
+    "is_new_team": false
+  }
+}
+```
+
+**Note**: This is automatically triggered when a user's `is_present` is set to `true` via `PATCH /api/users/:id`. The response from that endpoint will include the team assignment.
+
+---
+
+### 4. Create Random Teams
+
 **Endpoint**: `POST /api/teams/create-random`
 
 **Purpose**: Randomly assign all registered users into teams of 4
 
 **Request Body** (optional):
+
 ```json
 {
   "team_size": 4,
@@ -150,6 +203,7 @@ The team formation system randomly assigns registered users into teams of 4 memb
 ```
 
 **Response** (201):
+
 ```json
 {
   "message": "Random teams created successfully",
@@ -184,6 +238,7 @@ The team formation system randomly assigns registered users into teams of 4 memb
 ```
 
 **Notes**:
+
 - Clears all existing team assignments before creating new ones
 - Randomly shuffles all users
 - Creates teams of exactly 4 members (last team may have fewer if total users not divisible by 4)
@@ -192,11 +247,13 @@ The team formation system randomly assigns registered users into teams of 4 memb
 ---
 
 ### 4. Get All Teams
+
 **Endpoint**: `GET /api/teams`
 
 **Purpose**: Retrieve all teams with their members
 
 **Response** (200):
+
 ```json
 {
   "teams": [
@@ -227,6 +284,7 @@ The team formation system randomly assigns registered users into teams of 4 memb
 ---
 
 ### 5. Get Team by Number
+
 **Endpoint**: `GET /api/teams/:teamNumber`
 
 **Purpose**: Get details of a specific team
@@ -234,6 +292,7 @@ The team formation system randomly assigns registered users into teams of 4 memb
 **Example**: `GET /api/teams/1`
 
 **Response** (200):
+
 ```json
 {
   "team": {
@@ -260,15 +319,18 @@ The team formation system randomly assigns registered users into teams of 4 memb
 ---
 
 ### 6. Get User's Team
+
 **Endpoint**: `GET /api/teams/user/:identifier`
 
 **Purpose**: Find which team a user belongs to (by email or user_id)
 
-**Examples**: 
+**Examples**:
+
 - `GET /api/teams/user/john@example.com`
 - `GET /api/teams/user/uuid-here`
 
 **Response** (200):
+
 ```json
 {
   "user": {
@@ -287,6 +349,7 @@ The team formation system randomly assigns registered users into teams of 4 memb
 ```
 
 **Error Response** (404):
+
 ```json
 {
   "error": "User not in any team"
@@ -296,11 +359,13 @@ The team formation system randomly assigns registered users into teams of 4 memb
 ---
 
 ### 7. Clear All Teams (Admin)
+
 **Endpoint**: `DELETE /api/teams/clear`
 
 **Purpose**: Remove all team assignments
 
 **Response** (200):
+
 ```json
 {
   "message": "All team assignments cleared successfully"
@@ -314,25 +379,31 @@ The team formation system randomly assigns registered users into teams of 4 memb
 ## Migration Steps
 
 ### 1. Run Database Migration
+
 Execute the migration file in your Supabase SQL editor:
+
 ```sql
 -- Run: backend/database/migrations/005_create_team_members.sql
 ```
 
 This will:
+
 - Create the `team_members` table
 - Create the `team_summary` view
 - Set up the `create_random_team_assignments()` function
 - Configure RLS policies
 
 ### 2. Server Already Updated
+
 The routes are already registered in [index.js](backend/src/index.js):
+
 - `/api/verify-email` → Email verification
 - `/api/teams` → Team management
 
 ### 3. Test Endpoints
 
 **Test Email Verification**:
+
 ```bash
 curl -X POST http://localhost:3000/api/verify-email \
   -H "Content-Type: application/json" \
@@ -340,6 +411,7 @@ curl -X POST http://localhost:3000/api/verify-email \
 ```
 
 **Test Team Creation**:
+
 ```bash
 curl -X POST http://localhost:3000/api/teams/create-random \
   -H "Content-Type: application/json" \
@@ -347,11 +419,13 @@ curl -X POST http://localhost:3000/api/teams/create-random \
 ```
 
 **Test Get All Teams**:
+
 ```bash
 curl http://localhost:3000/api/teams
 ```
 
 **Test Get User's Team**:
+
 ```bash
 curl http://localhost:3000/api/teams/user/test@example.com
 ```
@@ -361,12 +435,14 @@ curl http://localhost:3000/api/teams/user/test@example.com
 ## Use Cases
 
 ### Scenario 1: Event Registration & Team Formation
+
 1. Students register → `POST /api/auth/register`
 2. Admin verifies registrations → `GET /api/users`
 3. Admin creates random teams → `POST /api/teams/create-random`
 4. Students check their teams → `GET /api/teams/user/:email`
 
 ### Scenario 2: QR Maze + Team Activities
+
 1. Individual QR Maze scoring → `POST /api/qrmaze/submit-score`
 2. Team-based activities → Teams formed via `POST /api/teams/create-random`
 3. View leaderboards:
@@ -374,6 +450,7 @@ curl http://localhost:3000/api/teams/user/test@example.com
    - Teams: `GET /api/teams`
 
 ### Scenario 3: Email Verification Before Submission
+
 1. User scans QR code → Frontend captures email
 2. Verify email exists → `POST /api/verify-email`
 3. If exists, allow score submission → `POST /api/qrmaze/submit-score`
@@ -384,17 +461,20 @@ curl http://localhost:3000/api/teams/user/test@example.com
 ## Security & Validation
 
 ### Row-Level Security (RLS)
+
 - ✅ Anyone can view teams (public)
 - ✅ Users can view their own team
 - ✅ Only admins can create/update/delete team assignments
 
 ### Automatic Features
+
 - ✅ Email normalization (lowercase, trim)
 - ✅ Email format validation (regex)
 - ✅ Unique constraint (one user per team)
 - ✅ Timestamp updates on modifications
 
 ### Constraints
+
 - User can only be in ONE team at a time
 - Team size default: 4 members
 - Last team may have fewer members if users not divisible by 4
@@ -415,7 +495,8 @@ curl http://localhost:3000/api/teams/user/test@example.com
 5. Return all created teams with member details
 ```
 
-**Example**: 
+**Example**:
+
 - 100 users → 25 teams of 4
 - 102 users → 25 teams of 4 + 1 team of 2
 - 98 users → 24 teams of 4 + 1 team of 2
@@ -437,11 +518,13 @@ curl http://localhost:3000/api/teams/user/test@example.com
 ## Complete System Architecture
 
 ### Database Tables
+
 1. **users** - Student registrations
 2. **team_members** - Random team assignments (NEW)
 3. **qrmaze** - Individual set scores (1-5)
 
 ### API Routes
+
 1. `/api/auth` - Authentication (register, login)
 2. `/api/users` - User management
 3. `/api/verify-email` - Email verification (NEW)
@@ -450,6 +533,7 @@ curl http://localhost:3000/api/teams/user/test@example.com
 6. `/api/scores` - Legacy scores (can be removed)
 
 ### Workflow Integration
+
 ```
 Registration → Email Verification → Team Formation → QR Maze Scoring
      ↓              ↓                    ↓                  ↓
