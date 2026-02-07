@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mark Attendance - Admin Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .nav-bar {
+            background: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-bar h2 {
+            color: #667eea;
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .nav-button {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .nav-button:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .stat-card p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px 12px 45px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 18px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-button {
+            padding: 8px 16px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .filter-button.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .filter-button:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .user-table thead {
+            background: #f5f5f5;
+        }
+
+        .user-table th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .user-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .user-table tbody tr:hover {
+            background: #f9f9f9;
+        }
+
+        .checkbox-cell {
+            text-align: center;
+            width: 60px;
+        }
+
+        .checkbox-cell input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge.present {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.absent {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .response {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            display: none;
+        }
+
+        .response.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            display: block;
+        }
+
+        .response.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            display: block;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 16px;
+        }
+
+        .bulk-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .select-all {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #f5f5f5;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="nav-bar">
+            <h2>📋 Mark Attendance</h2>
+            <div class="nav-buttons">
+                <a href="index.html" class="nav-button">← Back to Dashboard</a>
+            </div>
+        </div>
+
+        <h1>📋 Student Attendance Management</h1>
+
+        <!-- Statistics -->
+        <div class="card">
+            <h2 style="color: #667eea; margin-bottom: 16px;">Attendance Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3 id="totalUsers">0</h3>
+                    <p>Total Students</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="presentUsers">0</h3>
+                    <p>Present</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="absentUsers">0</h3>
+                    <p>Absent</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="attendanceRate">0%</h3>
+                    <p>Attendance Rate</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="card">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="Search by name, email, or enrollment number...">
+            </div>
+
+            <div class="filters">
+                <button class="filter-button active" onclick="filterUsers('all')">All Students</button>
+                <button class="filter-button" onclick="filterUsers('present')">Present Only</button>
+                <button class="filter-button" onclick="filterUsers('absent')">Absent Only</button>
+                <button class="filter-button" onclick="filterUsers('year1')">Year 1</button>
+                <button class="filter-button" onclick="filterUsers('year2')">Year 2</button>
+                <button class="filter-button" onclick="filterUsers('year3')">Year 3</button>
+            </div>
+
+            <!-- Bulk Actions -->
+            <div class="bulk-actions">
+                <div class="select-all">
+                    <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                    <label for="selectAll">Select All</label>
+                </div>
+                <button onclick="bulkMarkPresent()">Mark Selected as Present</button>
+                <button onclick="bulkMarkAbsent()"
+                    style="background: linear-gradient(135deg, #f93e3e 0%, #c42c2c 100%);">Mark Selected as
+                    Absent</button>
+            </div>
+
+            <!-- User Table -->
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th class="checkbox-cell">Select</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Enrollment No.</th>
+                        <th>Department</th>
+                        <th>Year</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="userTableBody">
+                    <tr>
+                        <td colspan="8" class="no-results">Loading users...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="response" id="responseMessage"></div>
+    </div>
+
+    <script>
+        // Use localhost when testing locally, production URL otherwise
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:3000'
+            : 'https://registration-ggsc.onrender.com';
+
+        console.log('Using API:', API_BASE);
+
+        let allUsers = [];
+        let filteredUsers = [];
+        let currentFilter = 'all';
+
+        // Check authentication
+        if (sessionStorage.getItem('isLoggedIn') !== 'true') {
+            window.location.href = 'index.html';
+        }
+
+        // Load users on page load
+        window.addEventListener('load', async () => {
+            await loadUsers();
+            await loadStats();
+        });
+
+        async function loadUsers() {
+            try {
+                const response = await fetch(`${API_BASE}/api/users`);
+                const data = await response.json();
+                allUsers = data.users || [];
+                filteredUsers = allUsers;
+                renderUsers();
+            } catch (error) {
+                showResponse({ error: error.message }, true);
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_BASE}/api/users/stats`);
+                const data = await response.json();
+                document.getElementById('totalUsers').textContent = data.total || 0;
+                document.getElementById('presentUsers').textContent = data.present || 0;
+                document.getElementById('absentUsers').textContent = data.absent || 0;
+                const rate = data.total > 0 ? Math.round((data.present / data.total) * 100) : 0;
+                document.getElementById('attendanceRate').textContent = rate + '%';
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+        }
+
+        function renderUsers() {
+            const tbody = document.getElementById('userTableBody');
+
+            if (filteredUsers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="no-results">No users found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filteredUsers.map(user => `
+                <tr>
+                    <td class="checkbox-cell">
+                        <input type="checkbox" class="user-checkbox" data-user-id="${user.id}">
+                    </td>
+                    <td>${user.full_name}</td>
+                    <td>${user.email}</td>
+                    <td>${user.enrollment_number}</td>
+                    <td>${user.department}</td>
+                    <td>${user.year}</td>
+                    <td>
+                        <span class="status-badge ${user.is_present ? 'present' : 'absent'}">
+                            ${user.is_present ? '✓ Present' : '✗ Absent'}
+                        </span>
+                    </td>
+                    <td>
+                        <button onclick="toggleAttendance('${user.id}', ${!user.is_present})" 
+                                style="padding: 6px 12px; font-size: 13px;">
+                            ${user.is_present ? 'Mark Absent' : 'Mark Present'}
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function toggleAttendance(userId, isPresent) {
+            try {
+                const response = await fetch(`${API_BASE}/api/users/${userId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ is_present: isPresent })
+                });
+
+                if (response.ok) {
+                    await loadUsers();
+                    await loadStats();
+                    showResponse({ message: `User marked as ${isPresent ? 'present' : 'absent'}` }, false);
+                } else {
+                    const error = await response.json();
+                    showResponse(error, true);
+                }
+            } catch (error) {
+                showResponse({ error: error.message }, true);
+            }
+        }
+
+        async function bulkMarkPresent() {
+            await bulkUpdateAttendance(true);
+        }
+
+        async function bulkMarkAbsent() {
+            await bulkUpdateAttendance(false);
+        }
+
+        async function bulkUpdateAttendance(isPresent) {
+            const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+            if (checkboxes.length === 0) {
+                showResponse({ error: 'Please select at least one user' }, true);
+                return;
+            }
+
+            const userIds = Array.from(checkboxes).map(cb => cb.dataset.userId);
+            let successCount = 0;
+
+            for (const userId of userIds) {
+                try {
+                    const response = await fetch(`${API_BASE}/api/users/${userId}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ is_present: isPresent })
+                    });
+                    if (response.ok) successCount++;
+                } catch (error) {
+                    console.error(`Failed to update user ${userId}:`, error);
+                }
+            }
+
+            await loadUsers();
+            await loadStats();
+            document.getElementById('selectAll').checked = false;
+            showResponse({
+                message: `${successCount} user(s) marked as ${isPresent ? 'present' : 'absent'}`
+            }, false);
+        }
+
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.user-checkbox');
+            checkboxes.forEach(cb => cb.checked = selectAll.checked);
+        }
+
+        function filterUsers(filter) {
+            currentFilter = filter;
+
+            // Update active button
+            document.querySelectorAll('.filter-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Apply filter
+            switch (filter) {
+                case 'all':
+                    filteredUsers = allUsers;
+                    break;
+                case 'present':
+                    filteredUsers = allUsers.filter(u => u.is_present);
+                    break;
+                case 'absent':
+                    filteredUsers = allUsers.filter(u => !u.is_present);
+                    break;
+                case 'year1':
+                    filteredUsers = allUsers.filter(u => u.year === 1);
+                    break;
+                case 'year2':
+                    filteredUsers = allUsers.filter(u => u.year === 2);
+                    break;
+                case 'year3':
+                    filteredUsers = allUsers.filter(u => u.year === 3);
+                    break;
+            }
+
+            applySearch();
+        }
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            applySearch();
+        });
+
+        function applySearch() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+            if (searchTerm === '') {
+                renderUsers();
+                return;
+            }
+
+            filteredUsers = filteredUsers.filter(user =>
+                user.full_name.toLowerCase().includes(searchTerm) ||
+                user.email.toLowerCase().includes(searchTerm) ||
+                user.enrollment_number.toLowerCase().includes(searchTerm) ||
+                user.department.toLowerCase().includes(searchTerm)
+            );
+
+            renderUsers();
+        }
+
+        function showResponse(data, isError) {
+            const element = document.getElementById('responseMessage');
+            element.className = `response ${isError ? 'error' : 'success'}`;
+            element.textContent = data.message || data.error || JSON.stringify(data);
+
+            setTimeout(() => {
+                element.className = 'response';
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>
