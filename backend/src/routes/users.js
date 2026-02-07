@@ -146,7 +146,13 @@ router.patch('/:id', async (req, res) => {
                 console.error('Team assignment RPC error:', rpcError);
                 teamError = rpcError.message;
             } else if (teamData && teamData.length > 0) {
-                teamAssignment = teamData[0];
+                // Map from SQL column names to response format
+                teamAssignment = {
+                    team_number: teamData[0].assigned_team_number,
+                    team_name: teamData[0].assigned_team_name,
+                    member_count: teamData[0].current_member_count,
+                    is_new_team: teamData[0].is_new_team
+                };
             } else {
                 console.log('Team assignment returned empty data:', teamData);
             }

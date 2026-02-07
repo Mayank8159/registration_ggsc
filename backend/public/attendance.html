@@ -404,7 +404,13 @@
     </div>
 
     <script>
-        const API_BASE = 'https://registration-ggsc.onrender.com';
+        // Use localhost when testing locally, production URL otherwise
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:3000'
+            : 'https://registration-ggsc.onrender.com';
+
+        console.log('Using API:', API_BASE);
+
         let allUsers = [];
         let filteredUsers = [];
         let currentFilter = 'all';
